@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TripCraft - Trip Planner</title>
+<meta name="description" content="Plan a trip in minutes: day-by-day itinerary, realistic budget, and packing list - from curated destination intelligence.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0e7490">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="design.css">
+<style>
+.grid{display:grid;grid-template-columns:370px 1fr;gap:22px;align-items:start}
+@media(max-width:1020px){.grid{grid-template-columns:1fr}}
+.sect{font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:7px 13px;border-radius:99px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--ink)}
+.chip.on{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;border-color:transparent}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.seg button{padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
+.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.day{border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;background:var(--surface)}
+.day-head{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;background:var(--surface2)}
+.day-head .dn{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.day-head b{flex:1;font-size:14.5px}
+.day-head span{font-size:12px;color:var(--muted);font-weight:600}
+.day-body{padding:6px 16px 14px;display:none}
+.day.open .day-body{display:block}
+.act{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+.act:last-child{border:none}
+.act .t{width:66px;flex:none;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;font-size:12.5px;padding-top:1px}
+.act .d b{display:block}
+.act .d span{color:var(--muted);font-size:12.5px}
+.act .c{margin-left:auto;white-space:nowrap;font-weight:700;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.budget-bar{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:10px 0 16px}
+.budget-bar i{display:block;height:100%}
+.brow{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;border-bottom:1px dashed var(--border)}
+.brow:last-child{border:none;font-weight:800}
+.brow span:last-child{font-variant-numeric:tabular-nums;font-weight:700}
+.pack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.pack{display:flex;gap:9px;align-items:center;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:13px;cursor:pointer;user-select:none}
+.pack.done{opacity:.55;text-decoration:line-through}
+.pack .box{width:17px;height:17px;border-radius:5px;border:2px solid var(--border);flex:none;display:grid;place-items:center;font-size:11px;color:#fff}
+.pack.done .box{background:var(--accent);border-color:var(--accent)}
+.limit-card{border-left:4px solid var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--surface));font-size:13.5px;color:var(--muted)}
+.limit-card b{color:var(--ink)}
+.stack{display:grid;gap:22px}
+.meta-line{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:14px}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="brand"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#g)"/><path d="M4 17l6.5-9.5L14 13l2.5-3L20 17H4z" fill="#fff"/><circle cx="17.5" cy="6.5" r="1.6" fill="#fff"/><defs><linearGradient id="g" x1="0" y1="0" x2="24" y2="24"><stop stop-color="#0e7490"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs></svg>&nbsp;TripCraft</div>
+  <span class="sp"></span>
+  <button id="btn-install" class="icon-btn" hidden title="Install app">⤓</button>
+  <button id="btn-theme" class="icon-btn" title="Toggle theme">☾</button>
+</nav>
+<main class="page">
+  <header class="page-head">
+    <h1>Your trip, <em>planned</em> in minutes</h1>
+    <p>Pick a destination, your style, and your budget. TripCraft drafts a day-by-day itinerary, a realistic cost breakdown, and a packing list from curated destination intelligence.</p>
+  </header>
+  <div class="grid">
+    <section class="card"><div class="card-body">
+      <h2 class="sect">Trip settings</h2>
+      <div class="field"><label for="dest">Destination</label><select id="dest" class="input"></select></div>
+      <div class="field"><label for="days">Length</label>
+        <select id="days" class="input">
+          <option value="3">3 days - long weekend</option>
+          <option value="5" selected>5 days</option>
+          <option value="7">7 days - full week</option>
+          <option value="10">10 days - deep dive</option>
+        </select></div>
+      <div class="field"><label>Budget tier</label>
+        <div class="seg" id="tier">
+          <button data-t="0">Backpacker</button>
+          <button data-t="1" class="on">Comfort</button>
+          <button data-t="2">Premium</button>
+        </div></div>
+      <div class="field"><label>Interests</label><div class="chips" id="interests"></div></div>
+      <div class="field"><label for="travelers">Travelers</label>
+        <select id="travelers" class="input">
+          <option value="1">Just me</option><option value="2" selected>2 people</option>
+          <option value="3">3 people</option><option value="4">4+ people</option>
+        </select></div>
+      <button class="btn primary" id="plan" style="width:100%;justify-content:center">Build my trip</button>
+    </div></section>
+    <div class="stack">
+      <section class="card"><div class="card-body">
+        <h2 class="sect">Your itinerary</h2>
+        <div class="meta-line" id="tripMeta"></div>
+        <div id="itinerary"></div>
+      </div></section>
+      <section class="card"><div class="card-body">
+        <h2 class="sect">Budget estimate</h2>
+        <div class="budget-bar" id="budgetBar"></div>
+        <div id="budgetRows"></div>
+        <p style="font-size:12px;color:var(--muted);margin-top:10px">Mid-range 2025 estimates for the tier, per trip. Excludes flights to the destination.</p>
+      </div></section>
+      <section class="card"><div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 class="sect" style="margin:0">Packing list</h2>
+          <span style="font-size:12px;color:var(--muted);font-weight:700" id="packCount"></span>
+        </div>
+        <div class="pack-grid" id="pack"></div>
+      </div></section>
+      <section class="card limit-card"><div class="card-body">
+        <b>Honest limits.</b> Destination data is curated and static - attractions, budgets, and pacing are real editorial knowledge but not live prices or availability. No flights or hotels are booked here; use it as the plan you take to booking sites.
+      </div></section>
+    </div>
+  </div>
+</main>
+<script src="core.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')</script>
+</body>
+</html>
